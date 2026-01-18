@@ -20,6 +20,8 @@
   --accent: #FF00FF;
   --accentSoft: rgba(255,0,255,0.18);
   --accentStroke: rgba(255,0,255,0.65);
+
+  --uiScale: 1;
 }
     html, body { height: 100%; }
     body{
@@ -31,6 +33,7 @@
     radial-gradient(1000px 700px at 50% 120%, rgba(98,255,184,0.06), transparent 60%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
   overflow:auto;
+  font-size: calc(16px * var(--uiScale));
 }
 
 /* ====== ARCADE / CRT OVERLAY ====== */
@@ -107,7 +110,7 @@ body::after{
       padding: 6px 10px; border-radius: 999px;
       background: rgba(231,238,247,0.08);
       border: 1px solid rgba(231,238,247,0.12);
-      font-size: 14px;
+      font-size: calc(14px * var(--uiScale));
     }
     .pill.flash-green{ animation: pillGreen 380ms ease; }
     .pill.flash-red{ animation: pillRed 380ms ease; }
@@ -127,7 +130,7 @@ body::after{
     .pill strong{ font-variant-numeric: tabular-nums; }
     main{ padding: 14px 12px 28px; max-width: none; margin: 0; }
     .row{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:14px; }
-    .hint{ opacity: 0.8; font-size: 13px; }
+    .hint{ opacity: 0.8; font-size: calc(13px * var(--uiScale)); }
     button{
   background: linear-gradient(180deg, rgba(231,238,247,0.10), rgba(231,238,247,0.06));
   color: var(--text);
@@ -200,9 +203,8 @@ button:disabled:hover{ transform:none; background: rgba(231,238,247,0.06); }
     }
     .homeMain{ padding: 18px 16px; max-width: 900px; margin: 0 auto; }
     .homeGrid{ display:grid; gap:12px; }
-    .miniHint{ opacity:0.75; font-size:13px; margin-top:14px; }
-    .nameRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
-    .nameRow label{ font-size:13px; opacity:0.85; }
+    .miniHint{ opacity:0.75; font-size: calc(13px * var(--uiScale)); margin-top:14px; }
+    .nameRow label{ font-size: calc(13px * var(--uiScale)); opacity:0.85; }
     .textInput{
       padding: 8px 10px;
       border-radius: 12px;
@@ -213,6 +215,15 @@ button:disabled:hover{ transform:none; background: rgba(231,238,247,0.06); }
     }
     .textInput:focus{ border-color: var(--accentStroke); box-shadow: 0 0 0 2px var(--accentSoft); }
     .btnRow{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+    .fontControls{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.fontBtn{ padding: 6px 8px; border-radius: 10px; line-height: 1; }
+.fontScaleLabel{
+  font-size: calc(12px * var(--uiScale));
+  opacity: 0.75;
+  min-width: 56px;
+  text-align:right;
+  font-variant-numeric: tabular-nums;
+}
     .grid{
       display:grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -243,27 +254,27 @@ box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.18);
       .searchWrap{ width: 100%; }
       #searchInput{ width: 100%; max-width: 100%; }
       .stats{ gap: 8px; }
-      .pill{ font-size: 12px; padding: 5px 8px; }
-      .hint{ font-size: 12px; }
+      .pill{ font-size: calc(12px * var(--uiScale)); padding: 5px 8px; }
+      .hint{ font-size: calc(12px * var(--uiScale)); }
 
       /* Denser grid: smaller minimum tile width */
       .grid{ grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
 
       /* Smaller fixed tile height and tighter padding */
       .tile{ height: 120px; min-height: 56px; padding: 10px 10px 8px; border-radius: 12px; }
-      .title{ font-size: 14px; }
-      .meta{ font-size: 11px; }
+      .title{ font-size: calc(14px * var(--uiScale)); }
+      .meta{ font-size: calc(11px * var(--uiScale)); }
 
       /* Stack list preview area slightly smaller */
       .stackList{ max-height: 62px; margin-top: 6px; padding-top: 6px; }
-      .chip{ font-size: 11px; padding: 3px 7px; }
+      .chip{ font-size: calc(11px * var(--uiScale)); padding: 3px 7px; }
     }
 
     /* Extra small phones */
     @media (max-width: 420px) {
       .grid{ grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 7px; }
       .tile{ height: 112px; }
-      .title{ font-size: 13px; }
+      .title{ font-size: calc(13px * var(--uiScale)); }
     }
 
     /* Touch devices: remove the tiny hover lift which can feel odd on tap */
@@ -302,8 +313,8 @@ box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.18);
   100%{ transform: translate3d(0,0,0); }
 }
 
-    .title{ font-weight:600; line-height:1.1; }
-    .meta{ font-size:12px; opacity:0.75; }
+    .title{ font-weight:600; line-height:1.1; font-size: calc(15px * var(--uiScale)); }
+    .meta{ font-size: calc(12px * var(--uiScale)); opacity:0.75; }
 
     /* Stack details (optional): shows the contents of merged stacks */
     .stackList{
@@ -318,7 +329,7 @@ box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.18);
     }
     .tile.stack .stackList{ display:flex; }
     .chip{
-      font-size:12px;
+      font-size: calc(12px * var(--uiScale));
       background: rgba(231,238,247,0.08);
       border: 1px solid rgba(231,238,247,0.12);
       padding: 4px 8px;
@@ -334,11 +345,60 @@ box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.18);
     }
 
     /* ====== Leaderboard ====== */
-table{ width:100%; border-collapse: collapse; font-size:14px; }
-th, td{ padding: 10px 10px; border-bottom: 1px solid rgba(231,238,247,0.12); text-align:left; }
-th{ font-size:12px; text-transform: uppercase; letter-spacing: 0.08em; opacity:0.8; }
+    #view-leaderboard .homeMain{ max-width: 1200px; }
+    #view-leaderboard .row{ align-items: center; }
+
+    /* Keep leaderboard filter buttons on one line; allow horizontal scroll if needed */
+    #view-leaderboard .row .btnRow{
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      justify-content: flex-end;
+      padding-bottom: 2px;
+      gap: 10px;
+    }
+    #view-leaderboard .row .btnRow button{ white-space: nowrap; }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: calc(14px * var(--uiScale));
+      table-layout: fixed;
+    }
+    th, td{
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    thead th{
+      font-size: calc(12px * var(--uiScale));
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity:0.8;
+      border-bottom: 1px solid rgba(231,238,247,0.12);
+    }
+    tbody td{ border-bottom: 1px solid rgba(231,238,247,0.06); }
+
+    /* Column widths for consistent alignment */
+    #view-leaderboard table th:nth-child(1),
+    #view-leaderboard table td:nth-child(1){ width: 44px; }
+
+    #view-leaderboard table th:nth-child(3),
+    #view-leaderboard table td:nth-child(3){ width: 120px; }
+
+    #view-leaderboard table th:nth-child(4),
+    #view-leaderboard table td:nth-child(4){ width: 120px; }
+
+    #view-leaderboard table th:nth-child(5),
+    #view-leaderboard table td:nth-child(5){ width: 140px; }
+
+    /* Leaderboard header layout: keep controls aligned and prevent odd spacing */
+    #view-leaderboard .shellHeader{ flex-wrap: wrap; align-items: flex-start; }
+    #view-leaderboard .shellHeader .fontControls{ margin-left: auto; }
+    #view-leaderboard .shellHeader .btnRow{ width: 100%; justify-content: flex-end; }
 .muted{ opacity:0.75; }
     .mono{ font-variant-numeric: tabular-nums; }
+    #view-leaderboard td.mono{ font-variant-numeric: tabular-nums; }
 
     /* ====== How To Play Modal ====== */
     .modalOverlay{
@@ -369,8 +429,8 @@ body.modal-open #newsOverlay{ pointer-events: auto; }
       box-shadow: 0 10px 40px rgba(0,0,0,0.55);
       padding: 16px 16px 14px;
     }
-    .modal h2{ margin: 0 0 8px; font-size: 18px; }
-    .modal p{ margin: 0 0 10px; line-height: 1.35; opacity: 0.9; }
+    .modal h2{ margin: 0 0 8px; font-size: calc(18px * var(--uiScale)); }
+    .modal p{ margin: 0 0 10px; line-height: 1.35; opacity: 0.9; font-size: calc(14px * var(--uiScale)); }
     .modal ul{ margin: 8px 0 14px 18px; padding: 0; opacity: 0.9; }
     .modal li{ margin: 6px 0; }
     .modalActions{ display:flex; gap:10px; justify-content:flex-end; margin-top: 12px; }
@@ -425,6 +485,12 @@ body.modal-open #newsOverlay{ pointer-events: auto; }
         <div class="pill" id="versionBadgeHome"></div>
       </div>
       <div class="nameRow">
+        <div class="fontControls" aria-label="Text size controls">
+          <button id="fontSmaller" type="button" class="fontBtn" aria-label="Smaller text">A−</button>
+          <button id="fontLarger" type="button" class="fontBtn" aria-label="Larger text">A+</button>
+          <div id="fontScaleLabel" class="fontScaleLabel" aria-live="polite"></div>
+        </div>
+      
         <label for="playerName">Name</label>
         <input id="playerName" class="textInput" type="text" placeholder="Kay" autocomplete="nickname" />
       </div>
@@ -459,6 +525,11 @@ body.modal-open #newsOverlay{ pointer-events: auto; }
           <button id="clearSearchBtn" type="button" aria-label="Clear search">×</button>
         </div>
         <div class="hint">Timer starts on first click. Refresh-safe.</div>
+        <div class="fontControls" aria-label="Text size controls" style="justify-content:flex-end;">
+          <button id="fontSmaller2" type="button" class="fontBtn" aria-label="Smaller text">A−</button>
+          <button id="fontLarger2" type="button" class="fontBtn" aria-label="Larger text">A+</button>
+          <div id="fontScaleLabel2" class="fontScaleLabel" aria-live="polite"></div>
+        </div>
       </div>
     </header>
 
@@ -552,6 +623,11 @@ body.modal-open #newsOverlay{ pointer-events: auto; }
         </div>
         <div class="miniHint">New board in: <span id="nextBoardIn" class="mono">--:--:--</span></div>
       </div>
+      <div class="fontControls" aria-label="Text size controls" style="justify-content:flex-end;">
+        <button id="fontSmaller3" type="button" class="fontBtn" aria-label="Smaller text">A−</button>
+        <button id="fontLarger3" type="button" class="fontBtn" aria-label="Larger text">A+</button>
+        <div id="fontScaleLabel3" class="fontScaleLabel" aria-live="polite"></div>
+      </div>
       <div class="btnRow">
         <button id="backHomeFromLB">Home</button>
         <button id="goStacksFromLB">Stacks</button>
@@ -632,6 +708,55 @@ const CHANGELOG_ITEMS = [
 
 const CHANGELOG_SEEN_KEY = "puzzle_changelog_seen_version_v1";
 const PLAYER_NAME_KEY = "puzzle_player_name_v1";
+
+// ====== PER-USER TEXT SIZE (A11Y) ======
+const FONT_SCALE_KEY = "puzzle_font_scale_v1";
+const FONT_SCALE_MIN = 0.85;
+const FONT_SCALE_MAX = 1.35;
+const FONT_SCALE_STEP = 0.05;
+
+function clamp(n, a, b){ return Math.min(b, Math.max(a, n)); }
+
+function loadFontScale(){
+  try {
+    const v = parseFloat(localStorage.getItem(FONT_SCALE_KEY) || "1");
+    if (!Number.isFinite(v)) return 1;
+    return clamp(v, FONT_SCALE_MIN, FONT_SCALE_MAX);
+  } catch {
+    return 1;
+  }
+}
+
+function applyFontScale(scale){
+  const v = clamp(Number(scale) || 1, FONT_SCALE_MIN, FONT_SCALE_MAX);
+  document.documentElement.style.setProperty("--uiScale", String(v));
+  const pct = `${Math.round(v * 100)}%`;
+  const a = document.getElementById("fontScaleLabel");
+  const b = document.getElementById("fontScaleLabel2");
+  const c = document.getElementById("fontScaleLabel3");
+  if (a) a.textContent = pct;
+  if (b) b.textContent = pct;
+  if (c) c.textContent = pct;
+}
+
+function saveFontScale(scale){
+  const v = clamp(Number(scale) || 1, FONT_SCALE_MIN, FONT_SCALE_MAX);
+  try { localStorage.setItem(FONT_SCALE_KEY, String(v)); } catch {}
+  applyFontScale(v);
+}
+
+function bindFontButtons(smallerId, largerId){
+  const smaller = document.getElementById(smallerId);
+  const larger = document.getElementById(largerId);
+  if (smaller && !smaller.dataset.boundFont) {
+    smaller.dataset.boundFont = "1";
+    smaller.addEventListener("click", () => saveFontScale(loadFontScale() - FONT_SCALE_STEP));
+  }
+  if (larger && !larger.dataset.boundFont) {
+    larger.dataset.boundFont = "1";
+    larger.addEventListener("click", () => saveFontScale(loadFontScale() + FONT_SCALE_STEP));
+  }
+}
 
   // DEV / TESTING TOGGLES
   // Set to true to make each game's Reset button also forget the "How To Play" seen flag
@@ -2324,7 +2449,13 @@ if (res && res.ok && res.signature) supaSig = res.signature;
     render();
     resumeTimerIfRunning();
 
-    setVersionBadges();
+// Per-user text size (saved locally)
+applyFontScale(loadFontScale());
+bindFontButtons("fontSmaller", "fontLarger");
+bindFontButtons("fontSmaller2", "fontLarger2");
+bindFontButtons("fontSmaller3", "fontLarger3");
+
+setVersionBadges();
 ensurePlayerNameWired();
 
 const prompted = maybePromptNameFirstVisit();
