@@ -619,14 +619,15 @@ body.modal-open #newsOverlay{ pointer-events: auto; }
   const MAX_STACK_PREVIEW_ITEMS = 3;
 
 // ====== VERSION / CHANGELOG (EDIT HERE) ======
-const APP_VERSION = "beta v0.0.1";
+const APP_VERSION = "beta v0.0.2";
 
 const CHANGELOG_TITLE = "What’s new";
 const CHANGELOG_ITEMS = [
   "The ability to put your name at the top of the page",
   "15 categories, with over 500 items",
   "Digital confetti when you win, because that's nice.",
-  "Live leaderboard, see how well you do against everyone else",
+  "Live leaderboard, see how well you do against everyone else"
+  "v0.0.2 - added new board generation rules, should mean no repeats for 3 days minimum",
 ];
 
 const CHANGELOG_SEEN_KEY = "puzzle_changelog_seen_version_v1";
@@ -683,6 +684,9 @@ const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
   : null;
 
 const DAILY_CATEGORY_COUNT = 4; // TEMP: show all current test categories
+
+// Avoid repeats across recent days
+const STACKS_NO_REPEAT_DAYS = 3; // do not repeat categories/items from the last N completed boards
 const STACKS_REGEN_SALT_KEY = "stacks_regen_salt_v1";
 
 function getRegenSaltForDay(dayKey) {
@@ -778,10 +782,69 @@ async function loadStacksFromSupabaseDaily() {
   }
 
   // Only categories that can supply TARGET_SET_SIZE items
+  // ====== Avoid repeats across recent days ======
+  // Build recent-history exclusions (categories + items) so boards don't feel repetitive.
+  let recentCategoryIds = new Set();
+  let recentItemIds = new Set();
+  let recentItemNorms = new Set();
+
+  try {
+    const today = new Date();
+    const days = Math.max(0, Math.floor(STACKS_NO_REPEAT_DAYS || 0));
+    if (days > 0) {
+      // Fetch recent boards by most recent date_key.
+      const { data: recentBoards, error: recentErr } = await supabaseClient
+        .from("daily_stacks_boards")
+        .select("date_key,category_ids,item_ids")
+        .order("date_key", { ascending: false })
+        .limit(days);
+
+      if (!recentErr && Array.isArray(recentBoards)) {
+        for (const b of recentBoards) {
+          // Skip today if present (shouldn't be, since we already checked)
+          if (b?.date_key === dayKey) continue;
+
+          if (Array.isArray(b?.category_ids)) {
+            for (const cid of b.category_ids) recentCategoryIds.add(cid);
+          }
+          if (Array.isArray(b?.item_ids)) {
+            for (const iid of b.item_ids) recentItemIds.add(iid);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Stacks: recent-history fetch failed:", e);
+  }
+
+  // Convert recent item ids to recent norms (best-effort)
+  try {
+    if (recentItemIds.size) {
+      const itemMapForNorms = new Map((its || []).map(i => [i.id, i]));
+      for (const iid of recentItemIds) {
+        const it = itemMapForNorms.get(iid);
+        if (!it) continue;
+        const n = (it.label_norm || "").trim() || normalizeLabelFallback(it.label);
+        if (n) recentItemNorms.add(n);
+      }
+    }
+  } catch {}
+
+  // Exclude recently used categories (unless we don't have enough)
   const eligibleCats = (cats || [])
-  .filter(c => (itemsByCat.get(c.id) || []).length >= TARGET_SET_SIZE)
-  .sort((a, b) => String(a.id).localeCompare(String(b.id)));
-  if (eligibleCats.length === 0) return { ok: false, reason: "no eligible categories" };
+    .filter(c => (itemsByCat.get(c.id) || []).length >= TARGET_SET_SIZE)
+    // Avoid categories used on recent boards (unless we don't have enough)
+    .filter(c => !recentCategoryIds.has(c.id))
+    .sort((a, b) => String(a.id).localeCompare(String(b.id)));
+
+  // If exclusion makes the pool too small, relax category exclusion (but keep item exclusion later)
+  const minNeedCats = Math.min(DAILY_CATEGORY_COUNT, (cats || []).length);
+  const relaxedCats = (cats || [])
+    .filter(c => (itemsByCat.get(c.id) || []).length >= TARGET_SET_SIZE)
+    .sort((a, b) => String(a.id).localeCompare(String(b.id)));
+
+  const catPool = (eligibleCats.length >= minNeedCats) ? eligibleCats : relaxedCats;
+  if (catPool.length === 0) return { ok: false, reason: "no eligible categories" };
 
   const dayKey = londonDateKey();
 
@@ -830,14 +893,14 @@ try {
 // So if you delete the Supabase row during testing, the next load produces a new board.
 const genNonce = (crypto?.randomUUID ? crypto.randomUUID() : (String(Math.random()).slice(2) + Date.now()));
 
-const shuffledCats = shuffleOnce(eligibleCats);
+const shuffledCats = shuffleOnce(catPool);
 
-  const usedNorms = new Set();
+  const usedNorms = new Set(recentItemNorms);
   const nextSets = [];
   const nextItems = [];
 
   for (const c of shuffledCats) {
-    if (nextSets.length >= Math.min(DAILY_CATEGORY_COUNT, eligibleCats.length)) break;
+    if (nextSets.length >= Math.min(DAILY_CATEGORY_COUNT, catPool.length)) break;
 
     const pool = (itemsByCat.get(c.id) || [])
   .slice()
@@ -848,8 +911,8 @@ const shuffledCats = shuffleOnce(eligibleCats);
     norm: (x.label_norm || "").trim() || normalizeLabelFallback(x.label),
   }));
 
-    // Filter out norms already used today
-    const cleanPool = pool.filter(p => p.norm && !usedNorms.has(p.norm));
+    // Filter out norms already used today OR on recent boards, and avoid recently-used item ids
+    const cleanPool = pool.filter(p => p.norm && !usedNorms.has(p.norm) && !recentItemIds.has(p.id));
     if (cleanPool.length < TARGET_SET_SIZE) continue;
 
 // Randomly choose items from this category
