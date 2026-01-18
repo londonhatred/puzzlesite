@@ -1233,29 +1233,57 @@ function ensurePlayerNameWired() {
 
 function maybePromptNameFirstVisit() {
   ensurePlayerNameWired();
-  const input = document.getElementById("playerName");
-  if (!input) return false;
 
   let existing = "";
   try { existing = (localStorage.getItem(PLAYER_NAME_KEY) || "").trim(); } catch {}
   if (existing) return false;
 
   if (newsTitle) newsTitle.textContent = "Pick a name";
-  if (newsBody) newsBody.innerHTML = `
-    <p>This is what shows on the leaderboard.</p>
-    <p class="muted">Type it in the Name box, then click below.</p>
-  `;
+  if (newsBody) {
+    newsBody.innerHTML = `
+      <p>This is what shows on the leaderboard.</p>
+      <div style="margin:10px 0 6px;">
+        <label for="newsNameInput" style="display:block; font-size:13px; opacity:0.85; margin-bottom:6px;">Name</label>
+        <input id="newsNameInput" class="textInput" type="text" placeholder="Kay" autocomplete="nickname" style="width:100%; box-sizing:border-box;" />
+      </div>
+      <p class="muted" style="margin-top:8px;">You can change this later on the home screen.</p>
+    `;
+  }
   if (newsPrimaryBtn) newsPrimaryBtn.textContent = "Save name";
 
-  newsPrimaryBtn.onclick = () => {
-    const v = (input.value || "").trim();
-    if (!v) { input.focus(); return; }
+  // Wire the modal input
+  const commit = () => {
+    const inputEl = document.getElementById("newsNameInput");
+    const v = (inputEl?.value || "").trim();
+    if (!v) {
+      inputEl?.focus();
+      return;
+    }
     try { localStorage.setItem(PLAYER_NAME_KEY, v); } catch {}
+
+    // Also reflect into the home input if present
+    const homeInput = document.getElementById("playerName");
+    if (homeInput) homeInput.value = v;
+
     closeNewsModal();
   };
 
+  newsPrimaryBtn.onclick = commit;
+
   openNewsModal();
-  setTimeout(() => input.focus(), 50);
+
+  // Focus and allow Enter-to-save
+  setTimeout(() => {
+    const inputEl = document.getElementById("newsNameInput");
+    inputEl?.focus();
+    if (inputEl && !inputEl.dataset.boundEnter) {
+      inputEl.dataset.boundEnter = "1";
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") commit();
+      });
+    }
+  }, 50);
+
   return true;
 }
 
