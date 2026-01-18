@@ -5,9 +5,74 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Stacks Puzzle Prototype</title>
   <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    :root{
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  --bg0: #07060b;
+  --bg1: #0b0f14;
+
+  --text: #e7eef7;
+  --muted: rgba(231,238,247,0.72);
+
+  --stroke: rgba(231,238,247,0.14);
+  --stroke2: rgba(231,238,247,0.18);
+
+  --accent: #FF00FF;
+  --accentSoft: rgba(255,0,255,0.18);
+  --accentStroke: rgba(255,0,255,0.65);
+}
     html, body { height: 100%; }
-    body { margin: 0; background: #0b0f14; color: #e7eef7; overflow: auto; }
+    body{
+  margin:0;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 700px at 20% -10%, rgba(255,0,255,0.12), transparent 60%),
+    radial-gradient(900px 600px at 90% 10%, rgba(140,198,255,0.08), transparent 55%),
+    radial-gradient(1000px 700px at 50% 120%, rgba(98,255,184,0.06), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  overflow:auto;
+}
+
+/* ====== ARCADE / CRT OVERLAY ====== */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.06) 0px,
+      rgba(255,255,255,0.06) 1px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0) 4px
+    );
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  animation: crtFlicker 6.5s infinite;
+}
+
+body::after{
+  content:"";
+  position: fixed;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 45% at 50% 35%, rgba(255,0,255,0.10), transparent 60%),
+    radial-gradient(70% 55% at 50% 120%, rgba(0,0,0,0.45), transparent 65%),
+    radial-gradient(90% 80% at 50% 50%, transparent 45%, rgba(0,0,0,0.55) 100%);
+  opacity: 0.28;
+}
+
+@keyframes crtFlicker{
+  0%, 100%{ opacity: 0.07; }
+  8%{ opacity: 0.06; }
+  12%{ opacity: 0.08; }
+  27%{ opacity: 0.065; }
+  31%{ opacity: 0.09; }
+  55%{ opacity: 0.062; }
+  58%{ opacity: 0.085; }
+}
     header{
       position: sticky; top: 0; z-index: 10;
       background: rgba(11,15,20,0.9); backdrop-filter: blur(10px);
@@ -28,15 +93,15 @@
       outline: none;
     }
     #searchInput::placeholder{ color: rgba(231,238,247,0.55); }
-    #searchInput:focus{ border-color: rgba(140,198,255,0.9); box-shadow: 0 0 0 2px rgba(140,198,255,0.18); }
-    #clearSearchBtn{
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      padding: 0;
-      line-height: 1;
-      font-size: 18px;
-    }
+    #searchInput:focus{
+  border-color: var(--accentStroke);
+  box-shadow: 0 0 0 2px var(--accentSoft);
+}
+
+.textInput:focus{
+  border-color: var(--accentStroke);
+  box-shadow: 0 0 0 2px var(--accentSoft);
+}
     .stats{ display:flex; gap:10px; flex-wrap:wrap; }
     .pill{
       padding: 6px 10px; border-radius: 999px;
@@ -64,22 +129,53 @@
     .row{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; margin-bottom:14px; }
     .hint{ opacity: 0.8; font-size: 13px; }
     button{
-      background: rgba(231,238,247,0.10);
-      color: #e7eef7;
-      border: 1px solid rgba(231,238,247,0.18);
-      border-radius: 12px;
-      padding: 8px 10px;
-      cursor: pointer;
-    }
-    button:hover{ background: rgba(231,238,247,0.14); }
-    button:disabled{
-      opacity: 0.45;
-      cursor: not-allowed;
-      background: rgba(231,238,247,0.06);
-      border-color: rgba(231,238,247,0.10);
-      filter: grayscale(1);
-    }
-    button:disabled:hover{ background: rgba(231,238,247,0.06); }
+  background: linear-gradient(180deg, rgba(231,238,247,0.10), rgba(231,238,247,0.06));
+  color: var(--text);
+  border: 1px solid rgba(231,238,247,0.18);
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform 0.06s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+button:hover{
+  background: linear-gradient(180deg, rgba(231,238,247,0.14), rgba(231,238,247,0.08));
+  transform: translateY(-1px);
+}
+button:active{ transform: translateY(0px) scale(0.99); }
+
+button:disabled{
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: rgba(231,238,247,0.06);
+  border-color: rgba(231,238,247,0.10);
+  filter: grayscale(1);
+  box-shadow: none;
+}
+button:disabled:hover{ transform:none; background: rgba(231,238,247,0.06); }
+
+.btnPrimary{
+  background: linear-gradient(180deg, rgba(255,0,255,0.30), rgba(255,0,255,0.16));
+  border-color: rgba(255,0,255,0.55);
+  box-shadow: 0 0 0 0 rgba(255,0,255,0), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.btnPrimary:hover{
+  background: linear-gradient(180deg, rgba(255,0,255,0.36), rgba(255,0,255,0.18));
+  box-shadow: 0 0 0 2px rgba(255,0,255,0.14), 0 0 18px rgba(255,0,255,0.12);
+}
+
+.btnGhost{
+  background: rgba(231,238,247,0.04);
+  border-color: rgba(231,238,247,0.14);
+}
+
+.btnDanger{
+  background: linear-gradient(180deg, rgba(255,98,98,0.20), rgba(255,98,98,0.10));
+  border-color: rgba(255,98,98,0.40);
+}
+.btnDanger:hover{
+  background: linear-gradient(180deg, rgba(255,98,98,0.26), rgba(255,98,98,0.12));
+}
 
     /* ====== VIEWS / ROUTING ====== */
     .view{ display:none; }
@@ -93,7 +189,15 @@
       padding: 14px 16px;
       display:flex; gap:16px; align-items:center; justify-content:space-between;
     }
-    .brand{ font-weight:800; letter-spacing:0.2px; }
+    .brand{
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      text-shadow:
+        0 0 18px rgba(255,0,255,0.20),
+        0 0 2px rgba(255,0,255,0.25);
+    }
     .homeMain{ padding: 18px 16px; max-width: 900px; margin: 0 auto; }
     .homeGrid{ display:grid; gap:12px; }
     .miniHint{ opacity:0.75; font-size:13px; margin-top:14px; }
@@ -107,7 +211,7 @@
       color: #e7eef7;
       outline:none;
     }
-    .textInput:focus{ border-color: rgba(140,198,255,0.9); box-shadow: 0 0 0 2px rgba(140,198,255,0.18); }
+    .textInput:focus{ border-color: var(--accentStroke); box-shadow: 0 0 0 2px var(--accentSoft); }
     .btnRow{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
     .grid{
       display:grid;
@@ -120,7 +224,8 @@
       user-select:none;
       border-radius:14px;
       border: 1px solid rgba(231,238,247,0.14);
-      background: rgba(231,238,247,0.06);
+      background: linear-gradient(180deg, rgba(231,238,247,0.07), rgba(231,238,247,0.04));
+box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.18);
       padding: 12px 12px 10px;
       cursor:pointer;
       transition: transform 0.06s ease, background 0.12s ease, border-color 0.12s ease;
@@ -167,10 +272,10 @@
     }
     .tile:hover{ transform: translateY(-1px); background: rgba(231,238,247,0.08); }
     .tile.selected{
-      border-color: rgba(140,198,255,0.9);
-      box-shadow: 0 0 0 2px rgba(140,198,255,0.25);
-      background: rgba(140,198,255,0.08);
-    }
+  border-color: var(--accentStroke);
+  box-shadow: 0 0 0 2px var(--accentSoft), 0 0 22px rgba(255,0,255,0.10), inset 0 1px 0 rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255,0,255,0.12), rgba(231,238,247,0.05));
+}
     .flash-green{ animation: flashGreen 380ms ease; }
     .flash-red{ animation: flashRed 380ms ease; }
 
@@ -185,6 +290,17 @@
       30%{ box-shadow: 0 0 0 3px rgba(255,98,98,0.30); border-color: rgba(255,98,98,0.8); background: rgba(255,98,98,0.12); }
       100%{ box-shadow: 0 0 0 0 rgba(255,98,98,0); border-color: rgba(231,238,247,0.14); background: rgba(231,238,247,0.06); }
     }
+
+/* ====== FEEDBACK SHAKE (Step 1F) ====== */
+.shake{ animation: shake 160ms ease-in-out; }
+@keyframes shake{
+  0%{ transform: translate3d(0,0,0); }
+  20%{ transform: translate3d(-1px, 0, 0); }
+  40%{ transform: translate3d(1px, 0, 0); }
+  60%{ transform: translate3d(-1px, 0, 0); }
+  80%{ transform: translate3d(1px, 0, 0); }
+  100%{ transform: translate3d(0,0,0); }
+}
 
     .title{ font-weight:600; line-height:1.1; }
     .meta{ font-size:12px; opacity:0.75; }
@@ -243,7 +359,8 @@ th{ font-size:12px; text-transform: uppercase; letter-spacing: 0.08em; opacity:0
   user-select: none;
 }
 body.modal-open #howToOverlay,
-body.modal-open #finishOverlay{ pointer-events: auto; }
+body.modal-open #finishOverlay,
+body.modal-open #newsOverlay{ pointer-events: auto; }
     .modal{
       width: min(640px, 100%);
       background: rgba(11,15,20,0.96);
@@ -303,7 +420,10 @@ body.modal-open #finishOverlay{ pointer-events: auto; }
   <!-- ====== HOME VIEW ====== -->
   <section id="view-home" class="view active">
     <div class="shellHeader">
-      <div class="brand">Kay's Puzzle Stuff</div>
+      <div style="display:flex; align-items:baseline; gap:10px;">
+        <div class="brand">Kay's Puzzle Stuff</div>
+        <div class="pill" id="versionBadgeHome"></div>
+      </div>
       <div class="nameRow">
         <label for="playerName">Name</label>
         <input id="playerName" class="textInput" type="text" placeholder="Kay" autocomplete="nickname" />
@@ -330,6 +450,7 @@ body.modal-open #finishOverlay{ pointer-events: auto; }
         <div class="pill" id="mistakesPill">Mistakes: <strong id="mistakes">0</strong></div>
         <div class="pill">Completed sets: <strong id="completedSets">0</strong></div>
         <div class="pill">Board: <strong id="boardSource">…</strong></div>
+        <div class="pill" id="versionBadgeStacks"></div>
       </div>
 
       <div class="headerRight">
@@ -425,7 +546,10 @@ body.modal-open #finishOverlay{ pointer-events: auto; }
   <section id="view-leaderboard" class="view">
     <div class="shellHeader">
       <div>
-        <div class="brand">Leaderboard</div>
+        <div style="display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;">
+          <div class="brand">Leaderboard</div>
+          <div class="pill" id="versionBadgeLB"></div>
+        </div>
         <div class="miniHint">New board in: <span id="nextBoardIn" class="mono">--:--:--</span></div>
       </div>
       <div class="btnRow">
@@ -451,6 +575,17 @@ body.modal-open #finishOverlay{ pointer-events: auto; }
     </div>
   </section>
 
+  <!-- ====== WHAT'S NEW / FIRST VISIT MODAL ====== -->
+<div id="newsOverlay" class="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+  <div class="modal">
+    <h2 id="newsTitle">What’s new</h2>
+    <div id="newsBody"></div>
+    <div class="modalActions">
+      <button id="newsPrimaryBtn">Continue</button>
+    </div>
+  </div>
+</div>
+
   <!-- ====== HOW TO PLAY MODAL (reused for each game) ====== -->
   <div id="howToOverlay" class="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="howToTitle">
     <div class="modal">
@@ -468,6 +603,9 @@ body.modal-open #finishOverlay{ pointer-events: auto; }
       <h2 id="finishTitle">Stacks complete!</h2>
       <div id="finishBody"></div>
       <div class="modalActions">
+        <button id="finishLeaderboardBtn">Leaderboard</button>
+        <button id="finishHomeBtn">Home</button>
+        <button id="finishPlayAgainBtn">Play again</button>
         <button id="finishCloseBtn">Close</button>
       </div>
     </div>
@@ -479,6 +617,20 @@ body.modal-open #finishOverlay{ pointer-events: auto; }
   // Real spec: TARGET_SET_SIZE = 45, with 45 sets × 45 items.
   const TARGET_SET_SIZE = 5;
   const MAX_STACK_PREVIEW_ITEMS = 3;
+
+// ====== VERSION / CHANGELOG (EDIT HERE) ======
+const APP_VERSION = "beta v0.0.1";
+
+const CHANGELOG_TITLE = "What’s new";
+const CHANGELOG_ITEMS = [
+  "The ability to put your name at the top of the page",
+  "15 categories, with over 500 items",
+  "Digital confetti when you win, because that's nice.",
+  "Live leaderboard, see how well you do against everyone else",
+];
+
+const CHANGELOG_SEEN_KEY = "puzzle_changelog_seen_version_v1";
+const PLAYER_NAME_KEY = "puzzle_player_name_v1";
 
   // DEV / TESTING TOGGLES
   // Set to true to make each game's Reset button also forget the "How To Play" seen flag
@@ -638,7 +790,7 @@ async function loadStacksFromSupabaseDaily() {
 try {
   const { data: boardRow, error: boardErr } = await supabaseClient
     .from("daily_stacks_boards")
-    .select("date_key,category_ids,item_ids,signature")
+    .select("date_key,category_ids,item_ids,signature,board_num")
     .eq("date_key", dayKey)
     .maybeSingle();
 
@@ -667,7 +819,7 @@ try {
         boardRow.signature ||
         `${dayKey}|${nextSets.map(s => s.id).join(",")}|${nextItems.map(i => i.id).join(",")}`;
 
-      return { ok: true, signature: sig, dayKey };
+        return { ok: true, signature: sig, dayKey, boardNum: boardRow.board_num ?? null };
     }
   }
 } catch {
@@ -722,7 +874,7 @@ const chosen = shuffleOnce(cleanPool).slice(0, TARGET_SET_SIZE);
 // Try to persist this daily board so everyone sees the same one.
 // If another client inserts first, we re-read the stored row and use it.
 try {
-  const { error: insErr } = await supabaseClient
+  const { data: insData, error: insErr } = await supabaseClient
     .from("daily_stacks_boards")
     .insert([{
       date_key: dayKey,
@@ -730,7 +882,11 @@ try {
       item_ids: nextItems.map(i => i.id),
       signature: sig,
       regenerated_at: new Date().toISOString(),
-    }]);
+    }])
+    .select("board_num")
+    .maybeSingle();
+
+  insertedBoardNum = insData?.board_num ?? null;
 
   if (insErr) {
     const msg = String(insErr.message || "").toLowerCase();
@@ -761,7 +917,7 @@ try {
           items = storedItems;
           rebuildLookups();
           const sig2 = boardRow2.signature || sig;
-          return { ok: true, signature: sig2, dayKey };
+          return { ok: true, signature: sig, dayKey, boardNum: insertedBoardNum };
         }
       }
     } else {
@@ -775,18 +931,21 @@ sets = nextSets;
 items = nextItems;
 rebuildLookups();
 
-return { ok: true, signature: sig, dayKey };
+return { ok: true, signature: sig, dayKey, boardNum: insertedBoardNum };
 }
 
 // Cache today's board locally so mobile resets can work even if Supabase is slow/offline.
-const STACKS_DAILY_CACHE_KEY = "stacks_daily_cache_v1";
+const STACKS_DAILY_CACHE_KEY = "stacks_daily_cache_v2";
 let stacksLoadPromise = null;
+
+let insertedBoardNum = null;
 
 function cacheStacksDailyBoard(dayKey, signature) {
   try {
     const payload = {
       dayKey,
       signature,
+      boardNum: stacksBoardNum,
       sets,
       items,
       cachedAt: Date.now(),
@@ -820,9 +979,10 @@ async function ensureStacksBoardReady() {
       const res = await loadStacksFromSupabaseDaily();
       if (res && res.ok) {
         // keep signature for mismatch detection
+        if (res.boardNum !== undefined) stacksBoardNum = res.boardNum ?? null;
         cacheStacksDailyBoard(res.dayKey || today, res.signature || "");
-setBoardSourceLabel("supabase");
-return { ok: true, source: "supabase", signature: res.signature || "", dayKey: res.dayKey || today };
+        setBoardSourceLabel("supabase", res.boardNum ?? null);
+        return { ok: true, source: "supabase", signature: res.signature || "", dayKey: res.dayKey || today };
       }
       // fall through to cache
       console.warn("Stacks: Supabase daily load failed:", res?.reason || res);
@@ -835,14 +995,15 @@ return { ok: true, source: "supabase", signature: res.signature || "", dayKey: r
     if (cached) {
       sets = cached.sets;
       items = cached.items;
+      if (cached.boardNum !== undefined) stacksBoardNum = cached.boardNum;
+      setBoardSourceLabel("cache", cached.boardNum ?? null);
       rebuildLookups();
-setBoardSourceLabel("cache");
-return { ok: true, source: "cache", signature: cached.signature || "", dayKey: cached.dayKey || today };
+      return { ok: true, source: "cache", signature: cached.signature || "", dayKey: cached.dayKey || today };
     }
 
     // 3) Nothing worked — leave demo data in place
     setBoardSourceLabel("demo");
-return { ok: false, source: "demo", signature: "", dayKey: today };
+    return { ok: false, source: "demo", signature: "", dayKey: today };
   })();
 
   return stacksLoadPromise;
@@ -852,16 +1013,6 @@ return { ok: false, source: "demo", signature: "", dayKey: today };
   const STORAGE_KEY = "stacks_puzzle_state_v1";
   // Signature for the currently loaded daily Stacks board (used to invalidate saved state)
 const STACKS_SIGNATURE_KEY = "stacks_puzzle_signature_v1";
-
-// ====== LOCAL LEADERBOARD (Step 2) ======
-const LB_KEY = "puzzle_arcade_leaderboard_v1";
-let leaderboardMode = "today";
-let leaderboardGame = "stacks"; // "stacks" | "numerate"
-
-// ====== SHARED LEADERBOARD (Supabase) ======
-// If supabaseClient is configured, we read/write a shared table `leaderboard_runs`.
-// Otherwise we fall back to localStorage only.
-const DEVICE_ID_KEY = "puzzle_device_id_v1";
 
 function getOrCreateDeviceId() {
   try {
@@ -1019,8 +1170,124 @@ function fmtHMS(ms) {
   return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
+function setVersionBadges() {
+  const ids = [
+    "versionBadgeHome",
+    "versionBadgeStacks",
+    "versionBadgeNumerate",
+    "versionBadgeTimeline",
+    "versionBadgeLB",
+  ];
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = APP_VERSION;
+  }
+}
+
+// ====== WHAT'S NEW / FIRST VISIT MODAL ======
+const newsOverlay = document.getElementById("newsOverlay");
+const newsTitle = document.getElementById("newsTitle");
+const newsBody = document.getElementById("newsBody");
+const newsPrimaryBtn = document.getElementById("newsPrimaryBtn");
+
+function openNewsModal() {
+  if (!newsOverlay) return;
+  newsOverlay.classList.add("active");
+  document.body.classList.add("modal-open");
+  setTimeout(() => newsPrimaryBtn?.focus(), 0);
+}
+
+function closeNewsModal() {
+  if (!newsOverlay) return;
+  newsOverlay.classList.remove("active");
+  document.body.classList.remove("modal-open");
+}
+
+function changelogHtml() {
+  const items = (CHANGELOG_ITEMS || []).map(x => `<li>${escapeHtml(x)}</li>`).join("");
+  return `
+    <p class="muted">${escapeHtml(APP_VERSION)}</p>
+    <ul>${items}</ul>
+  `;
+}
+
+function ensurePlayerNameWired() {
+  const input = document.getElementById("playerName");
+  if (!input) return;
+
+  // Load existing
+  try {
+    const existing = (localStorage.getItem(PLAYER_NAME_KEY) || "").trim();
+    if (existing && !input.value) input.value = existing;
+  } catch {}
+
+  // Save on input (bind once)
+  if (!input.dataset.boundName) {
+    input.dataset.boundName = "1";
+    input.addEventListener("input", () => {
+      const v = (input.value || "").trim();
+      try { localStorage.setItem(PLAYER_NAME_KEY, v); } catch {}
+    });
+  }
+}
+
+function maybePromptNameFirstVisit() {
+  ensurePlayerNameWired();
+  const input = document.getElementById("playerName");
+  if (!input) return false;
+
+  let existing = "";
+  try { existing = (localStorage.getItem(PLAYER_NAME_KEY) || "").trim(); } catch {}
+  if (existing) return false;
+
+  if (newsTitle) newsTitle.textContent = "Pick a name";
+  if (newsBody) newsBody.innerHTML = `
+    <p>This is what shows on the leaderboard.</p>
+    <p class="muted">Type it in the Name box, then click below.</p>
+  `;
+  if (newsPrimaryBtn) newsPrimaryBtn.textContent = "Save name";
+
+  newsPrimaryBtn.onclick = () => {
+    const v = (input.value || "").trim();
+    if (!v) { input.focus(); return; }
+    try { localStorage.setItem(PLAYER_NAME_KEY, v); } catch {}
+    closeNewsModal();
+  };
+
+  openNewsModal();
+  setTimeout(() => input.focus(), 50);
+  return true;
+}
+
+function maybeShowChangelogOncePerVersion() {
+  let seen = "";
+  try { seen = localStorage.getItem(CHANGELOG_SEEN_KEY) || ""; } catch {}
+  if (seen === APP_VERSION) return false;
+
+  try { localStorage.setItem(CHANGELOG_SEEN_KEY, APP_VERSION); } catch {}
+
+  if (newsTitle) newsTitle.textContent = CHANGELOG_TITLE || "What’s new";
+  if (newsBody) newsBody.innerHTML = changelogHtml();
+  if (newsPrimaryBtn) newsPrimaryBtn.textContent = "Continue";
+
+  newsPrimaryBtn.onclick = () => closeNewsModal();
+  openNewsModal();
+  return true;
+}
+
+// ====== LEADERBOARD KEYS ======
+// Local leaderboard storage
+const LB_KEY = "puzzle_arcade_leaderboard_v1";
+// Per-device id used for shared leaderboard submissions
+const DEVICE_ID_KEY = "puzzle_device_id_v1";
+
+// Current leaderboard filters
+let leaderboardMode = "today";      // "today" | "all"
+let leaderboardGame = "stacks";     // "stacks" | "numerate"
+
 function getPlayerName() {
-  const n = localStorage.getItem("puzzle_player_name_v1") || "";
+  let n = "";
+  try { n = localStorage.getItem(PLAYER_NAME_KEY) || ""; } catch {}
   return n.trim() || "Anonymous";
 }
 
@@ -1355,6 +1622,9 @@ async function renderLeaderboardAsync(mode = "today") {
       parsed.startMs ??= null;
       parsed.elapsedMs ??= 0;
       parsed.hasSubmittedWin ??= false;
+      parsed.showWinModal ??= false;
+      parsed.winModalDismissed ??= false;
+      parsed.winCelebrated ??= false;
 
       return parsed;
     } catch {
@@ -1371,10 +1641,19 @@ async function renderLeaderboardAsync(mode = "today") {
 let timerInterval = null;
 
 let stacksBoardSource = "demo"; // "supabase" | "cache" | "demo"
-function setBoardSourceLabel(src) {
+let stacksBoardNum = null;      // optional numeric id from Supabase
+
+function setBoardSourceLabel(src, boardNum = null) {
   stacksBoardSource = src || "demo";
+  if (boardNum !== undefined && boardNum !== null) stacksBoardNum = boardNum;
+
   const el = document.getElementById("boardSource");
-  if (el) el.textContent = String(stacksBoardSource).toUpperCase();
+  if (!el) return;
+
+  const base = String(stacksBoardSource).toUpperCase();
+  el.textContent = (stacksBoardNum !== null && stacksBoardNum !== undefined)
+    ? `${base} #${stacksBoardNum}`
+    : base;
 }
 
   function shuffleOnce(arr) {
@@ -1410,6 +1689,9 @@ function setBoardSourceLabel(src) {
       startMs: null,
       elapsedMs: 0,
       hasSubmittedWin: false,
+      showWinModal: false,
+      winModalDismissed: false,
+      winCelebrated: false,
     };
   }
 
@@ -1445,7 +1727,7 @@ function setBoardSourceLabel(src) {
       if (!state.hasStarted || !state.timerRunning || !state.startMs) return;
       const shown = state.elapsedMs + (Date.now() - state.startMs);
       document.getElementById("timer").textContent = fmtTime(shown);
-      setBoardSourceLabel(stacksBoardSource);
+      setBoardSourceLabel(stacksBoardSource, stacksBoardNum);
     }, 250);
   }
 
@@ -1506,13 +1788,24 @@ function freezeTimer() {
     return normalize(it?.label).includes(qNorm);
   }
 
+  function applyTransientClass(el, cls, durationMs = 220) {
+    if (!el) return;
+    el.classList.remove(cls);
+    // Force reflow so animation restarts
+    void el.offsetWidth;
+    el.classList.add(cls);
+    window.setTimeout(() => {
+      el.classList.remove(cls);
+    }, durationMs);
+  }
+
   function flashNode(nodeId, cls) {
     const el = document.querySelector(`[data-node-id="${nodeId}"]`);
     if (!el) return;
     el.classList.remove("flash-green", "flash-red");
-    // Force reflow so animation restarts
     void el.offsetWidth;
     el.classList.add(cls);
+    applyTransientClass(el, "shake", 170);
   }
 
   function flashPill(pillId, cls) {
@@ -1521,13 +1814,16 @@ function freezeTimer() {
     el.classList.remove("flash-green", "flash-red");
     void el.offsetWidth;
     el.classList.add(cls);
+    applyTransientClass(el, "shake", 170);
   }
 
   // ====== RENDER ======
   function setStats() {
     document.getElementById("correctLinks").textContent = String(state.correctLinks);
     document.getElementById("mistakes").textContent = String(state.mistakes);
-    document.getElementById("completedSets").textContent = String(state.completedSets);
+    const lc = lockedCount();
+if (state.completedSets !== lc) state.completedSets = lc;
+document.getElementById("completedSets").textContent = String(lc);
 
     let shown = state.elapsedMs;
     if (state.hasStarted && state.timerRunning && state.startMs) {
@@ -1592,9 +1888,25 @@ function freezeTimer() {
     state.selectedNodeId = null;
   }
 
-  function isSolved() {
-    return state.completedSets >= sets.length;
+  function expectedSetCount() {
+  // Count unique setIds actually present in the current board's items.
+  try {
+    const s = new Set((items || []).map(i => i.setId));
+    return s.size || 0;
+  } catch {
+    return 0;
   }
+}
+
+function lockedCount() {
+  return (state?.nodes || []).filter(n => n.type === "locked").length;
+}
+
+function isSolved() {
+  const need = expectedSetCount();
+  if (!need) return false;
+  return lockedCount() >= need;
+}
 
   function onTileClick(nodeId) {
     const clicked = getNode(nodeId);
@@ -1674,31 +1986,33 @@ function freezeTimer() {
     }
 
     if (isSolved()) {
-  freezeTimer();
+      freezeTimer();
 
-  // Submit to local leaderboard once per completed puzzle
-  if (!state.hasSubmittedWin) {
-    const result = {
-      mode: "stacks",
-      dateKey: londonDateKey(),
-      name: getPlayerName(),
-      timeMs: state.elapsedMs,
-      mistakes: state.mistakes,
-      correctLinks: state.correctLinks,
-      createdAt: Date.now(),
-    };
-    submitStacksRun(result);
-    state.hasSubmittedWin = true;
-    saveState();
-  }
+      // Submit to leaderboard once per completed puzzle
+      if (!state.hasSubmittedWin) {
+        const result = {
+          mode: "stacks",
+          dateKey: londonDateKey(),
+          name: getPlayerName(),
+          timeMs: state.elapsedMs,
+          mistakes: state.mistakes,
+          correctLinks: state.correctLinks,
+          createdAt: Date.now(),
+        };
+        submitStacksRun(result);
+        state.hasSubmittedWin = true;
+      }
 
-  // Show finish popup once per puzzle until dismissed
-if (localStorage.getItem(FINISH_DISMISSED_KEY) !== "1") {
-  showFinishModal();
-}
-} else {
-  saveState();
-}
+      // Win modal state (refresh-safe): show once, then don't re-show on refresh after dismissal.
+      state.showWinModal = true;
+      state.winModalDismissed = false;
+      state.winCelebrated = false; // allow celebration once for this completion
+      saveState();
+
+      showFinishModal({ variant: "win" });
+    } else {
+      saveState();
+    }
 
     render();
     flashNode(selected.nodeId, "flash-green");
@@ -1710,15 +2024,22 @@ if (localStorage.getItem(FINISH_DISMISSED_KEY) !== "1") {
   async function reset() {
     stopTicking();
 
+    // Don't allow resetting a solved daily puzzle.
+if (state && isSolved()) {
+  showFinishModal({ variant: "already" });
+  return;
+}
+
     // Mobile fix: ensure we have today's Supabase board (or cached board) before rebuilding.
     stacksLoadPromise = null; // force re-fetch (useful after deleting today's stored row)
-try {
-  await ensureStacksBoardReady();
-} catch {}
+    try {
+      await ensureStacksBoardReady();
+    } catch {}
 
-    state = freshState();
+    closeFinishModal({ silent: true });
+
     clearSavedState();
-    localStorage.removeItem(FINISH_DISMISSED_KEY);
+    state = freshState();
     saveState();
     render();
 
@@ -1737,9 +2058,10 @@ try {
 const finishOverlay = document.getElementById("finishOverlay");
 const finishBody = document.getElementById("finishBody");
 const finishCloseBtn = document.getElementById("finishCloseBtn");
+const finishPlayAgainBtn = document.getElementById("finishPlayAgainBtn");
+const finishHomeBtn = document.getElementById("finishHomeBtn");
+const finishLeaderboardBtn = document.getElementById("finishLeaderboardBtn");
 const confettiLayer = document.getElementById("confettiLayer");
-
-const FINISH_DISMISSED_KEY = "stacks_finish_dismissed_v1";
 
 // Finish modal countdown interval helpers
 let finishCountdownInterval = null;
@@ -1762,62 +2084,103 @@ function stopFinishCountdown() {
   finishCountdownInterval = null;
 }
 
-function confettiBurst() {
+function confettiBurstFromCorners() {
   if (!confettiLayer) return;
   confettiLayer.innerHTML = "";
   confettiLayer.classList.add("active");
 
-  const count = 60;
+  // 4 corner-ish launch bands
+  const bands = [
+    { min: 0, max: 18 },
+    { min: 22, max: 40 },
+    { min: 60, max: 78 },
+    { min: 82, max: 100 },
+  ];
+
+  const count = 80;
   for (let i = 0; i < count; i++) {
     const d = document.createElement("div");
     d.className = "confetto";
-    const left = Math.random() * 100;
-    const delay = Math.random() * 250;
+
+    const band = bands[i % bands.length];
+    const left = band.min + Math.random() * (band.max - band.min);
+    const delay = Math.random() * 220;
     const hue = Math.floor(Math.random() * 360);
 
     d.style.left = left + "vw";
-    d.style.top = (-10 - Math.random() * 20) + "px";
+    d.style.top = (-12 - Math.random() * 22) + "px";
     d.style.background = `hsl(${hue} 90% 60%)`;
     d.style.animationDelay = delay + "ms";
-    d.style.animationDuration = (900 + Math.random() * 700) + "ms";
+    d.style.animationDuration = (950 + Math.random() * 750) + "ms";
     confettiLayer.appendChild(d);
   }
 
   setTimeout(() => {
     confettiLayer.classList.remove("active");
     confettiLayer.innerHTML = "";
-  }, 1800);
+  }, 2000);
 }
 
-function showFinishModal() {
+function showFinishModal(opts = {}) {
   if (!finishOverlay || !finishBody) return;
 
-  const shown = state.elapsedMs + (state.timerRunning && state.startMs ? (Date.now() - state.startMs) : 0);
+  const variant = opts.variant || "win"; // "win" | "already"
+  const isAlready = variant === "already";
 
+  const titleEl = document.getElementById("finishTitle");
+  if (titleEl) titleEl.textContent = isAlready ? "You’ve already completed today’s Stacks" : "Stacks complete!";
+
+  const shown = state?.elapsedMs ?? 0;
   const nextIn = fmtHMS(msUntilNextLondonMidnight(new Date()));
 
   finishBody.innerHTML = `
     <p><strong>Time:</strong> ${escapeHtml(fmtTime(shown))}</p>
-    <p><strong>Mistakes:</strong> ${escapeHtml(String(state.mistakes))} &nbsp; <strong>Correct links:</strong> ${escapeHtml(String(state.correctLinks))}</p>
+    <p><strong>Mistakes:</strong> ${escapeHtml(String(state?.mistakes ?? 0))} &nbsp; <strong>Correct links:</strong> ${escapeHtml(String(state?.correctLinks ?? 0))}</p>
     <p><strong>New board in:</strong> <span id="finishNextBoardIn" class="mono">${escapeHtml(nextIn)}</span></p>
-    <p class="muted">There'll be a share function later, but for now, screenshot and gloat to your pals.</p>
+    <p class="muted">Leaderboard submission happens automatically on completion.</p>
   `;
 
   finishOverlay.classList.add("active");
   document.body.classList.add("modal-open");
-  confettiBurst();
+
+  // Celebration should only happen once per completed puzzle, and never for the "already" reminder.
+  if (!isAlready && state && !state.winCelebrated) {
+    confettiBurstFromCorners();
+    state.winCelebrated = true;
+    saveState();
+  }
+
   startFinishCountdown();
 }
 
-function closeFinishModal() {
-  if (!finishOverlay) return;
-  finishOverlay.classList.remove("active");
+function closeFinishModal(opts = {}) {
+  const silent = !!opts.silent;
+
+  if (finishOverlay) finishOverlay.classList.remove("active");
   document.body.classList.remove("modal-open");
   stopFinishCountdown();
-  try { localStorage.setItem(FINISH_DISMISSED_KEY, "1"); } catch {}
+
+  // Mark dismissed so refresh doesn't keep popping it.
+  if (!silent && state && isSolved()) {
+    state.showWinModal = false;
+    state.winModalDismissed = true;
+    saveState();
+  }
 }
 
-finishCloseBtn?.addEventListener("click", closeFinishModal);
+finishCloseBtn?.addEventListener("click", () => closeFinishModal());
+finishPlayAgainBtn?.addEventListener("click", async () => {
+  closeFinishModal({ silent: true });
+  await reset();
+});
+finishHomeBtn?.addEventListener("click", () => {
+  closeFinishModal();
+  showView("home");
+});
+finishLeaderboardBtn?.addEventListener("click", () => {
+  closeFinishModal();
+  showView("leaderboard");
+});
 
   // ====== BOOT ======
   (async function boot() {
@@ -1862,15 +2225,28 @@ if (res && res.ok && res.signature) supaSig = res.signature;
         state.searchQuery = "";
         saveState();
         render();
+        setVersionBadges();
         searchEl.focus();
       });
     }
 
     render();
     resumeTimerIfRunning();
-    if (isSolved() && localStorage.getItem(FINISH_DISMISSED_KEY) !== "1") {
-  showFinishModal();
+
+    setVersionBadges();
+ensurePlayerNameWired();
+
+const prompted = maybePromptNameFirstVisit();
+if (!prompted) {
+  maybeShowChangelogOncePerVersion();
 }
+
+    // If already solved and the win modal wasn't dismissed, show it once (refresh-safe)
+    if (isSolved() && state && !state.winModalDismissed) {
+      state.showWinModal = true;
+      saveState();
+      showFinishModal({ variant: "win" });
+    }
 
     // Ensure state exists in storage
     saveState();
@@ -2145,8 +2521,12 @@ function resetNumerate() {
   let pendingStartFn = null;
 
   function howToKey(mode) {
-    return `howto_seen_v1_${mode}`;
+  if (mode === "stacks") {
+    const sig = localStorage.getItem(STACKS_SIGNATURE_KEY) || londonDateKey();
+    return `howto_seen_v2_stacks_${sig}`;
   }
+  return `howto_seen_v1_${mode}`;
+}
 
   function showHowTo(mode, title, htmlBody, onStart) {
     // Ensure no game timers are running behind the modal.
@@ -2398,14 +2778,23 @@ function stopNextBoardCountdown() {
       maybeShowHowToFor("timeline");
     }
     if (which === "stacks") {
-      // Show how-to on first ever entry; Start Game begins timer immediately
-      maybeShowHowToFor("stacks");
-      if (localStorage.getItem(howToKey("stacks")) === "1") {
-        // Do not auto-start timer on every entry; only start if never started yet
-        // (Timer starts on first click, but Start Game from modal forces it.)
+      // If the puzzle is already solved, don't show How-To again.
+      if (state && isSolved()) {
+        // If they've dismissed the win modal, show a lighter "already completed" reminder on re-enter.
+        if (state.winModalDismissed) {
+          showFinishModal({ variant: "already" });
+        } else if (state.showWinModal) {
+          showFinishModal({ variant: "win" });
+        }
+      } else {
+        // Only show How-To if they haven't started this board yet.
+        if (state && !state.hasStarted) {
+          maybeShowHowToFor("stacks");
+        }
       }
     }
     currentView = which;
+    setVersionBadges();
   }
 
   // Nav buttons
